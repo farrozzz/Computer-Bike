@@ -1,0 +1,69 @@
+
+ 
+#include "EasyNextionLibrary.h"  // Include EasyNextionLibrary 
+
+EasyNex myNex(Serial1); // Create an object of EasyNex class with the name < myNex >
+                       // Set as parameter the Serial you are going to use
+int kmh=0;
+int distance=0;
+int cal=0;
+int val = 0;
+double kkbanspd = 0.00223;
+int distance_before =0;
+int cal_before=0;
+int buttonPin = 2 ;  // the number of the pushbutton pin
+int ledPin = 13;   // the number of the LED pin
+int buttonState = 0; // variable for reading the pushbutton status
+int delay1 = 1000;
+int ledState=0;
+
+void setup()
+ {
+  pinMode(ledPin, OUTPUT);  // initialize the LED pin as an output:
+  pinMode(buttonPin, INPUT);  // initialize the pushbutton pin as an input:
+  // set initial LED state
+  digitalWrite(ledPin, ledState);
+
+Serial.begin(115200);
+  myNex.begin(9600); // Begin the object with a baud rate of 9600
+                     // If no parameter was given in the begin(), the default baud rate of 9600 will be used
+  delay(500);        // Wait for Nextion to start
+  Serial3.begin(9600);
+  Serial.println("Initialize");
+ }
+
+void loop()
+  {
+    if (Serial3.available()>0) {        
+  unsigned int val= Serial3.parseInt();
+  unsigned long kmh= val*20*0.001885;
+  unsigned long distance= (distance_before+(val*0.00223));
+  distance_before = distance;
+  unsigned long cal=cal_before+(val*0.03)/10;
+  cal_before=cal;
+  Serial.print(kmh);
+  Serial.println("  km/h");
+  Serial.print(distance);
+  Serial.println("   meter");
+  Serial.print(cal);
+  Serial.println("     cal");
+  myNex.writeNum("n0.val", kmh);       // After that, we send the number variable, as value to n1
+  myNex.writeNum("x1.val", distance);
+  myNex.writeNum("x0.val", cal);
+    {
+  buttonState = digitalRead(buttonPin);   // read the state of the pushbutton value:
+  // check if the pushbutton is pressed.
+  // if it is, the buttonState is HIGH:
+
+  if (buttonState == HIGH) {
+    digitalWrite(ledPin, HIGH);// turn LED on:
+     delay(delay1);
+  }
+  else {
+    digitalWrite(ledPin, LOW);// turn LED off:
+  }
+}
+
+    delay(800);  
+    }
+  }
