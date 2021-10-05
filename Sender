@@ -1,0 +1,54 @@
+
+*  Module // Arduino UNO/NANO    
+    GND    ->   GND
+    Vcc    ->   3.3V
+    Tx     ->   D10
+    Rx     ->   D11      
+ */
+// digital pin 2 is the hall pin
+int hall_pin=2;
+// set number of hall trips for RPM reading (higher improves accuracy)
+float hall_thresh=100.0;
+int diameter = 25;
+#include <SoftwareSerial.h>
+SoftwareSerial HC12(10,11); // HC-12 TX Pin, HC-12 RX Pin
+
+void setup() {
+  Serial.begin(115200);             // Serial port to computer
+  HC12.begin(9600);               // Serial port to HC12
+   // make the hall pin an input:
+  pinMode(hall_pin, INPUT);
+  Serial.print("Initialize");
+}
+void loop() {
+   // preallocate values for tach
+ // float hall_count =1.0;
+ int hall_count=1;
+  float start =micros();
+  bool on_state =false;
+  // counting number of times the hall sensor is tripped
+  // but without double counting during the same trip
+  while(true){
+    if (digitalRead(hall_pin)==0){
+      if (on_state==false){
+        on_state=true;
+        hall_count++;
+      }
+    } else{
+      on_state = false;
+      break;
+    }
+  }
+  // print information about Time and RPM
+  float end_time = micros();
+  float time_passed = ((end_time-start)/1000000.0);
+  Serial.print("Time Passed: ");
+  Serial.print(time_passed);
+  Serial.println("s");
+  float rpm_val = (60.0/(hall_count/time_passed));
+  Serial.println(hall_count);
+  Serial.print(rpm_val);
+  HC12.print(rpm_val);  
+  Serial.println(" rpm");
+  delay(1000);        // delay in between reads for stability
+  }
